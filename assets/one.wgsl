@@ -12,4 +12,5 @@ fn display_vs(@builtin(vertex_index) vid : u32) -> @builtin(position) vec4f {
 
 @fragment
 fn display_fs() -> @location(0) vec4f {
-  return vec4f(0.2, 0.3, 0.4, 1.0);
+  return vec4f(0.9, 0.9, 0.9, 1.0);
+}

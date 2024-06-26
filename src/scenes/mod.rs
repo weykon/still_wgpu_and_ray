@@ -5,32 +5,25 @@ use std::{
 
 use wgpu::{PipelineCompilationOptions, PipelineLayoutDescriptor};
 
-use crate::base_work::WgpuThing;
-
-pub fn entry() {}
+use crate::base_work::{App, WgpuThing};
 
 pub trait Scene {
-    fn render(&self);
+    fn prepare_pipeline(&self, app: &App) -> Option<wgpu::RenderPipeline>;
 }
 
 pub struct Scene1 {
     pub name: String,
-    pub(crate) wpgu_thing: Option<Weak<Mutex<WgpuThing>>>,
 }
 
 impl Scene for Scene1 {
-    fn render(&self) {
+    fn prepare_pipeline(&self, app: &App) -> Option<wgpu::RenderPipeline> {
         println!("Rendering {}", self.name);
-        let Some(ref wgpu_thing) = self.wpgu_thing else {
-            return;
-        };
-        let wgpu_thing = wgpu_thing.upgrade().unwrap();
-        let wgpu_thing = wgpu_thing.lock().unwrap();
+        let wgpu_thing = &app.wgpu_thing;
+        let wgpu_thing = wgpu_thing.as_ref().unwrap().lock().unwrap();
         let shader_moduel = compile_shader_module(&wgpu_thing.device);
-        create_display_pipeline(&wgpu_thing.device, &shader_moduel);
+        return Some(create_display_pipeline(&wgpu_thing.device, &shader_moduel));
     }
 }
-
 fn compile_shader_module(device: &wgpu::Device) -> wgpu::ShaderModule {
     use std::borrow::Cow;
     let code = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/one.wgsl"));
@@ -39,11 +32,11 @@ fn compile_shader_module(device: &wgpu::Device) -> wgpu::ShaderModule {
         source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(code)),
     })
 }
-
 fn create_display_pipeline(
     device: &wgpu::Device,
     shader_module: &wgpu::ShaderModule,
 ) -> wgpu::RenderPipeline {
+    println!("Creating display pipeline");
     device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("display"),
         layout: None,
@@ -63,7 +56,7 @@ fn create_display_pipeline(
             module: shader_module,
             entry_point: "display_fs",
             targets: &[Some(wgpu::ColorTargetState {
-                format: wgpu::TextureFormat::Bgra8Unorm,
+                format: wgpu::TextureFormat::Bgra8UnormSrgb,
                 blend: None,
                 write_mask: wgpu::ColorWrites::ALL,
             })],

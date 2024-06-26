@@ -1,5 +1,8 @@
 use base_work::App;
-use winit::{event_loop::EventLoop, platform::macos::EventLoopBuilderExtMacOS};
+use winit::{
+    event_loop::{ControlFlow, EventLoop},
+    platform::macos::EventLoopBuilderExtMacOS,
+};
 
 mod base_work;
 mod camera;
@@ -14,6 +17,8 @@ fn main() {
         wgpu_thing: None,
         app_state: 0,
         window: None,
+        pipeline: None,
     };
+    // event_loop.set_control_flow(ControlFlow::Poll);
     event_loop.run_app(&mut app).unwrap();
 }

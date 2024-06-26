@@ -1,23 +1,18 @@
 use dpi::{PhysicalPosition, Position};
 use event::WindowEvent;
-use event_loop::EventLoop;
-use platform::macos::EventLoopBuilderExtMacOS;
-use std::borrow::{Borrow, BorrowMut};
-use std::cell::RefCell;
-use std::ops::Deref;
-use std::rc::Rc;
+use std::borrow::Borrow;
 use std::sync::{Arc, Mutex};
 use wgpu::{SurfaceConfiguration, *};
 use winit::*;
-use winit::{application::ApplicationHandler, dpi::PhysicalSize, window::Window};
+use winit::{application::ApplicationHandler, window::Window};
 
 use crate::scenes::Scene;
-use crate::wgpu_settings;
 
 pub struct App {
     pub wgpu_thing: Option<Arc<Mutex<WgpuThing>>>,
     pub app_state: i32,
     pub window: Option<Arc<Window>>,
+    pub pipeline: Option<wgpu::RenderPipeline>,
 }
 
 pub struct WgpuThing {
@@ -27,7 +22,6 @@ pub struct WgpuThing {
     pub config: SurfaceConfiguration,
     pub adapter: Adapter,
     pub size: winit::dpi::PhysicalSize<u32>,
-    pub render: Box<dyn Scene>,
 }
 
 impl ApplicationHandler<WgpuThing> for App {
@@ -43,6 +37,7 @@ impl ApplicationHandler<WgpuThing> for App {
         self.window = Some(Arc::clone(&window));
         pollster::block_on(async move {
             let _ = self.connect_to_gpu().await;
+            self.window.as_ref().unwrap().request_redraw();
         });
     }
 
@@ -54,6 +49,7 @@ impl ApplicationHandler<WgpuThing> for App {
     ) {
         match event {
             WindowEvent::Resized(size) => {
+                println!("Resized to {:?}", size);
                 let Some(ref wgpu_thing) = self.wgpu_thing else {
                     return;
                 };
@@ -67,6 +63,24 @@ impl ApplicationHandler<WgpuThing> for App {
             }
             WindowEvent::RedrawRequested => {
                 println!("Redraw requested");
+                // Wait for the next available frame buffer.
+                let frame: wgpu::SurfaceTexture = self
+                    .wgpu_thing
+                    .as_ref()
+                    .unwrap()
+                    .lock()
+                    .unwrap()
+                    .surface
+                    .get_current_texture()
+                    .expect("failed to get current texture");
+
+                // TODO: draw frame
+                let render_target = frame
+                    .texture
+                    .create_view(&wgpu::TextureViewDescriptor::default());
+
+                self.render_frame(&render_target);
+                frame.present();
             }
             _ => {}
         }

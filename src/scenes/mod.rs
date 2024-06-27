@@ -1,69 +1,47 @@
-use std::{
-    borrow::Borrow,
-    sync::{Mutex, Weak},
-};
-
-use wgpu::{PipelineCompilationOptions, PipelineLayoutDescriptor};
-
-use crate::base_work::{App, WgpuThing};
+use crate::base_work::App;
 
 pub trait Scene {
     fn prepare_pipeline(&self, app: &App) -> Option<wgpu::RenderPipeline>;
+    fn render_frame(&self, app: &App, target: &wgpu::TextureView);
 }
 
-pub struct Scene1 {
-    pub name: String,
-}
+pub mod half_screen;
+pub mod red_triangle;
 
-impl Scene for Scene1 {
-    fn prepare_pipeline(&self, app: &App) -> Option<wgpu::RenderPipeline> {
-        println!("Rendering {}", self.name);
-        let wgpu_thing = &app.wgpu_thing;
-        let wgpu_thing = wgpu_thing.as_ref().unwrap().lock().unwrap();
-        let shader_moduel = compile_shader_module(&wgpu_thing.device);
-        return Some(create_display_pipeline(&wgpu_thing.device, &shader_moduel));
+pub struct SceneSelector {
+    pub scenes: Vec<Box<dyn Scene>>,
+    pub current_scene_index: usize,
+    pub current_pipeline: Option<wgpu::RenderPipeline>,
+}
+impl SceneSelector {
+    pub fn select(&mut self, index: usize) -> &Box<dyn Scene> {
+        let scene = match self.scenes.get(index) {
+            Some(scene) => {
+                self.current_scene_index = index;
+                scene
+            }
+            None => {
+                self.current_scene_index = 0;
+                self.scenes.get(0).unwrap()
+            }
+        };
+        scene
     }
-}
-fn compile_shader_module(device: &wgpu::Device) -> wgpu::ShaderModule {
-    use std::borrow::Cow;
-    let code = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/one.wgsl"));
-    device.create_shader_module(wgpu::ShaderModuleDescriptor {
-        label: None,
-        source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(code)),
-    })
-}
-fn create_display_pipeline(
-    device: &wgpu::Device,
-    shader_module: &wgpu::ShaderModule,
-) -> wgpu::RenderPipeline {
-    println!("Creating display pipeline");
-    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-        label: Some("display"),
-        layout: None,
-        primitive: wgpu::PrimitiveState {
-            topology: wgpu::PrimitiveTopology::TriangleList,
-            front_face: wgpu::FrontFace::Ccw,
-            polygon_mode: wgpu::PolygonMode::Fill,
-            ..Default::default()
-        },
-        vertex: wgpu::VertexState {
-            module: shader_module,
-            entry_point: "display_vs",
-            buffers: &[],
-            compilation_options: PipelineCompilationOptions::default(),
-        },
-        fragment: Some(wgpu::FragmentState {
-            module: shader_module,
-            entry_point: "display_fs",
-            targets: &[Some(wgpu::ColorTargetState {
-                format: wgpu::TextureFormat::Bgra8UnormSrgb,
-                blend: None,
-                write_mask: wgpu::ColorWrites::ALL,
-            })],
-            compilation_options: PipelineCompilationOptions::default(),
-        }),
-        depth_stencil: None,
-        multisample: wgpu::MultisampleState::default(),
-        multiview: None,
-    })
+    pub fn get_current_scene(&self) -> &Box<dyn Scene> {
+        self.scenes.get(self.current_scene_index).unwrap()
+    }
+    pub fn new() -> Self {
+        SceneSelector {
+            scenes: vec![
+                Box::new(red_triangle::Scene1 {
+                    name: "red_triangle".to_string(),
+                }),
+                Box::new(half_screen::Scene1 {
+                    name: "half_screen".to_string(),
+                }),
+            ],
+            current_scene_index: 0,
+            current_pipeline: None,
+        }
+    }
 }

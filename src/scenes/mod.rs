@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use crate::base_work::App;
 
 pub trait Scene {
@@ -5,10 +7,10 @@ pub trait Scene {
     fn render_frame(&self, app: &App, target: &wgpu::TextureView);
 }
 
+pub mod buffer_first_bind;
 pub mod color_screen;
 pub mod half_screen;
 pub mod red_triangle;
-
 pub struct SceneSelector {
     pub scenes: Vec<Box<dyn Scene>>,
     pub current_scene_index: usize,
@@ -42,6 +44,10 @@ impl SceneSelector {
                 }),
                 Box::new(color_screen::Scene1 {
                     name: "color_screen".to_string(),
+                }),
+                Box::new(buffer_first_bind::Scene1 {
+                    name: "buffer_first_bind".to_string(),
+                    bind_group: RefCell::new(None),
                 }),
             ],
             current_scene_index: 0,

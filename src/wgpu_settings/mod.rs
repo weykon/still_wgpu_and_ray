@@ -52,7 +52,7 @@ impl App {
             queue,
             surface,
             config,
-            size: PhysicalSize::new(320, 320),
+            size: PhysicalSize::new(128, 128),
             adapter,
         })));
 

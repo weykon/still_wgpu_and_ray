@@ -31,11 +31,11 @@ impl ApplicationHandler<WgpuThing> for App {
         println!("Resumed");
         let window_attris = winit::window::WindowAttributes::default()
             .with_title("Fantastic window number one!")
-            .with_inner_size(winit::dpi::LogicalSize::new(320.0, 320.0))
+            .with_inner_size(winit::dpi::LogicalSize::new(128.0, 128.0))
             .with_active(false);
 
         let window: Window = event_loop.create_window(window_attris).unwrap();
-        window.set_outer_position(Position::Physical(PhysicalPosition::new(0, 0)));
+        window.set_outer_position(Position::Physical(PhysicalPosition::new(2500, 1500)));
         let window = Arc::new(window);
         self.window = Some(Arc::clone(&window));
         pollster::block_on(async move {

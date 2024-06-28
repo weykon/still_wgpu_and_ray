@@ -5,6 +5,7 @@ pub trait Scene {
     fn render_frame(&self, app: &App, target: &wgpu::TextureView);
 }
 
+pub mod color_screen;
 pub mod half_screen;
 pub mod red_triangle;
 
@@ -38,6 +39,9 @@ impl SceneSelector {
                 }),
                 Box::new(half_screen::Scene1 {
                     name: "half_screen".to_string(),
+                }),
+                Box::new(color_screen::Scene1 {
+                    name: "color_screen".to_string(),
                 }),
             ],
             current_scene_index: 0,

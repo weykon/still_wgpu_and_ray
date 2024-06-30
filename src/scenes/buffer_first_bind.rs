@@ -77,7 +77,8 @@ pub(crate) fn compile_shader_module(device: &wgpu::Device) -> wgpu::ShaderModule
     use std::borrow::Cow;
     let code = include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/assets/buffer_first_bind.wgsl"
+        // "/assets/buffer_first_bind.wgsl"
+        "/assets/wow_sky_light.wgsl"
     ));
     device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: None,
@@ -106,6 +107,7 @@ impl Scene1 {
             }],
         });
 
+        // Cpu => Gpu
         let uniform_data = TheFirstUniformBuffer {
             width: 128u32,
             height: 128u32,

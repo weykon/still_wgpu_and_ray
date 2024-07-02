@@ -1,10 +1,11 @@
-use std::cell::RefCell;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::base_work::App;
 
 pub trait Scene {
     fn prepare_pipeline(&self, app: &App) -> Option<wgpu::RenderPipeline>;
     fn render_frame(&self, app: &App, target: &wgpu::TextureView);
+    fn on_resize(&self, app: &App, width: u32, height: u32) {}
 }
 
 pub mod buffer_first_bind;

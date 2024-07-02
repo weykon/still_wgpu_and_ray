@@ -62,7 +62,11 @@ impl ApplicationHandler<WgpuThing> for App {
                 wgpu_thing
                     .surface
                     .configure(&wgpu_thing.device, &wgpu_thing.config);
-
+                self.scene_selector.get_current_scene().on_resize(
+                    &self,
+                    size.width as u32,
+                    size.height as u32,
+                );
                 self.window.as_ref().unwrap().request_redraw();
             }
             WindowEvent::RedrawRequested => {

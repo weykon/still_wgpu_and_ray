@@ -9,10 +9,10 @@ struct Sphere {
 const OBJECT_COUNT : u32 = 2;
 alias Scene = array<Sphere, OBJECT_COUNT>;
 var<private> scene : Scene = Scene(
-Sphere(/*center*/ vec3(0., 0., -1.), /*radius*/ 0.5),
+Sphere(/*center*/ vec3(0., 0., -1.), /*radius*/ 0.2),
 Sphere(/*center*/ vec3(0., -100.5, -1.), /*radius*/ 100.),
 );
-const FLT_MAX: f32 = 3.40282346638528859812e38;
+const FLT_MAX : f32 = 3.40282346638528859812e38;
 
 fn intersect_sphere(ray : Ray, sphere : Sphere) -> f32 {
     let v = ray.origin - sphere.center;
@@ -63,7 +63,7 @@ fn sky_color(ray : Ray) -> vec3f {
 
     let aspect_ratio = f32(uniforms.width) / f32(uniforms.height);
     var uv = pos.xy / vec2f(f32(uniforms.width - 1u), f32(uniforms.height - 1u));
-    uv = (2. * uv - vec2(1.)) * vec2(aspect_ratio, -1.);
+    uv = (uv / 2 - vec2(0.5)) * vec2(aspect_ratio, -1.);
     let origin = vec3(0.);
     let focus_distance = 1.;
     let direction = vec3(uv, -focus_distance);
@@ -77,7 +77,7 @@ fn sky_color(ray : Ray) -> vec3f {
         }
     }
     if closest_t < FLT_MAX {
-        return vec4(1., 0.76, 0.03, 1.);
+        return vec4(1., 0.76, 0.03, 1.) * saturate(1. - closest_t);
     }
     return vec4(sky_color(ray), 1.);
 }

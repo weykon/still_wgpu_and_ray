@@ -1,4 +1,4 @@
-use std::{cell::RefCell, ops::Deref};
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 use super::Scene;
 use crate::base_work::App;
@@ -74,7 +74,7 @@ pub(crate) fn compile_shader_module(device: &wgpu::Device) -> wgpu::ShaderModule
     let code = include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
         // "/assets/buffer_first_bind.wgsl"
-        "/assets/sphere.wgsl"
+        "/assets/add_groud.wgsl"
     ));
     device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: None,
@@ -111,15 +111,16 @@ impl Scene1 {
         let uniform_buffer: wgpu::Buffer = device.create_buffer(&BufferDescriptor {
             label: Some(&"the first buffer bind group"),
             size: std::mem::size_of::<TheFirstUniformBuffer>() as u64,
-            usage: wgpu::BufferUsages::UNIFORM,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: true,
         });
-        uniform_buffer
-            .slice(..)
-            .get_mapped_range_mut()
-            .copy_from_slice(bytemuck::bytes_of(&uniform_data));
-        uniform_buffer.unmap();
-
+        {
+            uniform_buffer
+                .slice(..)
+                .get_mapped_range_mut()
+                .copy_from_slice(bytemuck::bytes_of(&uniform_data));
+            uniform_buffer.unmap();
+        }
         // 创建bind group后写回self.bind_group给render pass用
         *self.bind_group.borrow_mut() =
             Some(device.create_bind_group(&wgpu::BindGroupDescriptor {

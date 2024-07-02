@@ -1,12 +1,9 @@
-use std::{cell::RefCell, ops::Deref, rc::Rc};
+use std::{cell::RefCell, ops::Deref};
 
 use super::Scene;
 use crate::base_work::App;
 use bytemuck::{Pod, Zeroable};
-use wgpu::{
-    BindGroup, BindGroupDescriptor, BufferBinding, BufferDescriptor, Device,
-    PipelineCompilationOptions, RenderPipeline,
-};
+use wgpu::{core::device, BindGroup, BufferDescriptor, PipelineCompilationOptions, RenderPipeline};
 pub struct Scene1 {
     pub name: String,
     // 给render pass用
@@ -19,7 +16,6 @@ struct TheFirstUniformBuffer {
     width: u32,
     height: u32,
 }
-
 impl Scene for Scene1 {
     fn prepare_pipeline(&self, app: &App) -> Option<wgpu::RenderPipeline> {
         println!("Rendering Buffer first Bind : {}", self.name);
@@ -78,7 +74,7 @@ pub(crate) fn compile_shader_module(device: &wgpu::Device) -> wgpu::ShaderModule
     let code = include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
         // "/assets/buffer_first_bind.wgsl"
-        "/assets/wow_sky_light.wgsl"
+        "/assets/sphere.wgsl"
     ));
     device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: None,

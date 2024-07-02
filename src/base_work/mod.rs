@@ -1,14 +1,11 @@
+use crate::scenes::SceneSelector;
 use dpi::{PhysicalPosition, Position};
 use event::{ElementState, KeyEvent, WindowEvent};
 use keyboard::KeyCode;
-use std::borrow::{Borrow, BorrowMut};
-use std::ops::Deref;
 use std::sync::{Arc, Mutex};
 use wgpu::{SurfaceConfiguration, *};
 use winit::*;
 use winit::{application::ApplicationHandler, window::Window};
-
-use crate::scenes::{Scene, SceneSelector};
 
 pub struct App {
     pub wgpu_thing: Option<Arc<Mutex<WgpuThing>>>,
@@ -65,6 +62,7 @@ impl ApplicationHandler<WgpuThing> for App {
                 wgpu_thing
                     .surface
                     .configure(&wgpu_thing.device, &wgpu_thing.config);
+
                 self.window.as_ref().unwrap().request_redraw();
             }
             WindowEvent::RedrawRequested => {

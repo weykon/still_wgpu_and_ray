@@ -36,6 +36,10 @@ impl SceneSelector {
     pub fn new() -> Self {
         SceneSelector {
             scenes: vec![
+                Box::new(buffer_first_bind::Scene1 {
+                    name: "buffer_first_bind".to_string(),
+                    bind_group: RefCell::new(None),
+                }),
                 Box::new(red_triangle::Scene1 {
                     name: "red_triangle".to_string(),
                 }),
@@ -44,10 +48,6 @@ impl SceneSelector {
                 }),
                 Box::new(color_screen::Scene1 {
                     name: "color_screen".to_string(),
-                }),
-                Box::new(buffer_first_bind::Scene1 {
-                    name: "buffer_first_bind".to_string(),
-                    bind_group: RefCell::new(None),
                 }),
             ],
             current_scene_index: 0,

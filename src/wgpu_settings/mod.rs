@@ -1,7 +1,5 @@
 use crate::base_work::{App, WgpuThing};
-use crate::scenes::SceneSelector;
 use anyhow::*;
-use std::borrow::BorrowMut;
 use std::sync::{Arc, Mutex};
 use winit::dpi::PhysicalSize;
 
@@ -39,7 +37,7 @@ impl App {
             .await
             .map_err(|_| anyhow!("Failed to create device"))?;
         println!("Device created : {:?}", device.global_id());
-        let size = PhysicalSize::new(860, 640);
+        let size = PhysicalSize::new(128, 128);
         println!("size : {:?}", size);
 
         let config = surface

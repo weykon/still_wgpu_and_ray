@@ -29,11 +29,7 @@ impl Scene for Scene1 {
                 label: Some("render frame"),
             });
 
-        let pipeline = app
-            .scene_selector
-            .current_pipeline
-            .as_ref()
-            .unwrap();
+        let pipeline = app.scene_selector.current_pipeline.as_ref().unwrap();
         {
             println!("Creating render pass");
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
